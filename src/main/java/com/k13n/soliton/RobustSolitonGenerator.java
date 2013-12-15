@@ -4,7 +4,7 @@ import java.util.Random;
 
 public class RobustSolitonGenerator implements SolitonGenerator {
   private Random random;
-  private int k;
+  private int k, M;
   private double c, delta, R, beta;
 
   public RobustSolitonGenerator(int k, double c, double delta, long seed) {
@@ -13,6 +13,7 @@ public class RobustSolitonGenerator implements SolitonGenerator {
     this.delta = delta;
     random = new Random(seed);
     R = computeR();
+    M = computeM();
     beta = computeBeta();
   }
 
@@ -23,6 +24,25 @@ public class RobustSolitonGenerator implements SolitonGenerator {
   private double computeR() {
     return c * Math.log(k / delta) * Math.sqrt(k);
   }
+
+  private int computeM() {
+    return (int) Math.floor(k / R);
+  }
+
+
+  public RobustSolitonGenerator(int k, int M, double delta, long seed) {
+    this.k = k;
+    this.M = M;
+    this.delta = delta;
+    random = new Random(seed);
+    R = k / ((double) M);
+    beta = computeBeta();
+  }
+
+  public RobustSolitonGenerator(int k, int M, double delta) {
+    this(k, M, delta, new Random().nextLong());
+  }
+
 
   private double computeBeta() {
     double sum = 0;
@@ -50,10 +70,10 @@ public class RobustSolitonGenerator implements SolitonGenerator {
   }
 
   private double unnormalizedRobustSoliton(int i) {
-    if (1 <= i && i <= Math.floor(k/R)-1)
-      return R / (i*k);
-    else if (i == Math.floor(k / R))
-      return R * Math.log(R / delta) / k;
+    if (1 <= i && i <= M-1)
+      return 1.0 / (i*M);
+    else if (i == M)
+      return Math.log(R / delta) / M;
     else
       return 0;
   }
