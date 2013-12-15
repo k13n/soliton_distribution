@@ -13,6 +13,9 @@ public class RobustSolitonGenerator implements SolitonGenerator {
 
   public RobustSolitonGenerator(int nrBlocks, double c,
       double failureProbability, long seed) {
+    checkNrBlocks(nrBlocks);
+    checkConstantC(c);
+    checkFailureProbability(failureProbability);
     this.nrBlocks = nrBlocks;
     this.c = c;
     this.failureProbability = failureProbability;
@@ -35,9 +38,11 @@ public class RobustSolitonGenerator implements SolitonGenerator {
     return (int) Math.floor(nrBlocks / R);
   }
 
-
   public RobustSolitonGenerator(int nrBlocks, int spike,
       double failureProbability, long seed) {
+    checkNrBlocks(nrBlocks);
+    checkSpike(spike, nrBlocks);
+    checkFailureProbability(failureProbability);
     this.nrBlocks = nrBlocks;
     this.spike = spike;
     this.failureProbability = failureProbability;
@@ -57,7 +62,6 @@ public class RobustSolitonGenerator implements SolitonGenerator {
       sum += idealSoliton(i) + unnormalizedRobustSoliton(i);
     return sum;
   }
-
 
   @Override
   public int next() {
@@ -92,6 +96,32 @@ public class RobustSolitonGenerator implements SolitonGenerator {
       return 1.0 / nrBlocks;
     else
       return 1.0 / (i * (i - 1));
+  }
+
+  private void checkNrBlocks(int nrBlocks) {
+    if (nrBlocks <= 0)
+      throw new IllegalArgumentException(
+          "number of blocks must be strictly positive");
+  }
+
+  private void checkConstantC(double c) {
+    if (c <= 0)
+      throw new IllegalArgumentException("the constant c must be positive");
+  }
+
+  private void checkFailureProbability(double failureProbability) {
+    if (failureProbability < 0 || failureProbability > 1)
+      throw new IllegalArgumentException(
+          "the admissible failure probability must be within the range [0,1]");
+  }
+
+  private void checkSpike(int spike, int nrBlocks) {
+    if (spike <= 0)
+      throw new IllegalArgumentException(
+          "the parameter spike must be strictly positive");
+    if (spike > nrBlocks)
+      throw new IllegalArgumentException(
+          "the parameter spike must be less than or equal to the number of blocks");
   }
 
 }
