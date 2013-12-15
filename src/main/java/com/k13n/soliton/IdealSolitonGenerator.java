@@ -4,23 +4,23 @@ import java.util.Random;
 
 public class IdealSolitonGenerator implements SolitonGenerator {
   private Random random;
-  private int k;
+  private int nrBlocks;
 
-  public IdealSolitonGenerator(int k, long seed) {
-    this.k = k;
+  public IdealSolitonGenerator(int nrBlocks, long seed) {
+    this.nrBlocks = nrBlocks;
     random = new Random(seed);
   }
 
-  public IdealSolitonGenerator(int k) {
-    this(k, new Random().nextLong());
+  public IdealSolitonGenerator(int nrBlocks) {
+    this(nrBlocks, new Random().nextLong());
   }
 
   public int next() {
     double v = 1 - random.nextDouble();
-    if (v <= (1.0 / k))
+    if (v <= (1.0 / nrBlocks))
       return 1;
     else
-      return binarySearch(v, 2, k);
+      return binarySearch(v, 2, nrBlocks);
   }
 
   private int binarySearch(double v, int min, int max) {

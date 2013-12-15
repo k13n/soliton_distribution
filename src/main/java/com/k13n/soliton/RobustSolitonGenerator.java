@@ -4,52 +4,60 @@ import java.util.Random;
 
 public class RobustSolitonGenerator implements SolitonGenerator {
   private Random random;
-  private int k, M;
-  private double c, delta, R, beta;
+  private int nrBlocks; // k
+  private int spike; // M
+  private double failureProbability; // delta
+  private double normalizationFactor; // beta
+  private double c;
+  private double R;
 
-  public RobustSolitonGenerator(int k, double c, double delta, long seed) {
-    this.k = k;
+  public RobustSolitonGenerator(int nrBlocks, double c,
+      double failureProbability, long seed) {
+    this.nrBlocks = nrBlocks;
     this.c = c;
-    this.delta = delta;
+    this.failureProbability = failureProbability;
     random = new Random(seed);
     R = computeR();
-    M = computeM();
-    beta = computeBeta();
+    spike = computeSpikePosition();
+    normalizationFactor = computeNormalizationFactor();
   }
 
-  public RobustSolitonGenerator(int k, double c, double delta) {
-    this(k, c, delta, new Random().nextLong());
+  public RobustSolitonGenerator(int nrBlocks, double c,
+      double failureProbability) {
+    this(nrBlocks, c, failureProbability, new Random().nextLong());
   }
 
   private double computeR() {
-    return c * Math.log(k / delta) * Math.sqrt(k);
+    return c * Math.log(nrBlocks / failureProbability) * Math.sqrt(nrBlocks);
   }
 
-  private int computeM() {
-    return (int) Math.floor(k / R);
+  private int computeSpikePosition() {
+    return (int) Math.floor(nrBlocks / R);
   }
 
 
-  public RobustSolitonGenerator(int k, int M, double delta, long seed) {
-    this.k = k;
-    this.M = M;
-    this.delta = delta;
+  public RobustSolitonGenerator(int nrBlocks, int spike,
+      double failureProbability, long seed) {
+    this.nrBlocks = nrBlocks;
+    this.spike = spike;
+    this.failureProbability = failureProbability;
     random = new Random(seed);
-    R = k / ((double) M);
-    beta = computeBeta();
+    R = nrBlocks / ((double) spike);
+    normalizationFactor = computeNormalizationFactor();
   }
 
-  public RobustSolitonGenerator(int k, int M, double delta) {
-    this(k, M, delta, new Random().nextLong());
+  public RobustSolitonGenerator(int nrBlocks, int spike,
+      double failureProbability) {
+    this(nrBlocks, spike, failureProbability, new Random().nextLong());
   }
 
-
-  private double computeBeta() {
+  private double computeNormalizationFactor() {
     double sum = 0;
-    for (int i = 1; i <= k; i++)
+    for (int i = 1; i <= nrBlocks; i++)
       sum += idealSoliton(i) + unnormalizedRobustSoliton(i);
     return sum;
   }
+
 
   @Override
   public int next() {
@@ -58,31 +66,32 @@ public class RobustSolitonGenerator implements SolitonGenerator {
   }
 
   private int inverseTransformSampling(double u) {
-     double sum = 0;
-     int index = 1;
-     while (sum <= u)
-       sum += normalizedRobustSoliton(index++);
-     return index - 1;
+    double sum = 0;
+    int index = 1;
+    while (sum <= u)
+      sum += normalizedRobustSoliton(index++);
+    return index - 1;
   }
 
   private double normalizedRobustSoliton(int i) {
-    return (idealSoliton(i) + unnormalizedRobustSoliton(i)) / beta;
+    return (idealSoliton(i) + unnormalizedRobustSoliton(i))
+        / normalizationFactor;
   }
 
   private double unnormalizedRobustSoliton(int i) {
-    if (1 <= i && i <= M-1)
-      return 1.0 / (i*M);
-    else if (i == M)
-      return Math.log(R / delta) / M;
+    if (1 <= i && i <= spike - 1)
+      return 1.0 / (i * spike);
+    else if (i == spike)
+      return Math.log(R / failureProbability) / spike;
     else
       return 0;
   }
 
   private double idealSoliton(int i) {
     if (i == 1)
-      return 1.0 / k;
+      return 1.0 / nrBlocks;
     else
-      return 1.0 / (i * (i-1));
+      return 1.0 / (i * (i - 1));
   }
 
 }
