@@ -1,4 +1,4 @@
-package com.k13n.soliton;
+package soliton;
 
 public class App {
   private static int DEFAULT_NR_BLOCKS = 10000;

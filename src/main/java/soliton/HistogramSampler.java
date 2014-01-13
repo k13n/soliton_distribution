@@ -1,4 +1,4 @@
-package com.k13n.soliton;
+package soliton;
 
 import java.util.Collections;
 import java.util.Map;
